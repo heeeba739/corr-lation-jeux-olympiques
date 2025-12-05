@@ -93,9 +93,53 @@ _ `info()`:   ------------------------------------------------------------------
 <img width="332" height="464" alt="image" src="https://github.com/user-attachments/assets/cb8b12bc-eca2-4d9b-85b2-9e75ad7c6bb1" />  |          <img width="542" height="378" alt="image" src="https://github.com/user-attachments/assets/358dfc1f-218d-4760-a6f7-e098fc6be907" />
 
   ## Table Region:
-  _ `info()`:, _`describe()`:
+  _ `info()`:
 
 <img width="374" height="350" alt="image" src="https://github.com/user-attachments/assets/c0a31571-ae3a-4ec7-abc7-e908594635a5" />
+
+## Table des API
+
+_`info()`:
+
+<img width="461" height="422" alt="image" src="https://github.com/user-attachments/assets/a949c04f-4cc2-4f14-912d-5b397b42f362" />
+
+### Nettoyage des données:
+
+# Résumé des modifications et méthodes de nettoyage
+
+| Étape (modification) | Objectif / Remarque | Extrait de code | Méthode(s) / fonction(s) utilisées |
+|---|---:|---|---|
+| Lecture des fichiers | Charger les CSV en DataFrame | `df = pd.read_csv('athlete_events.csv')` | `pandas.read_csv` |
+| Renommer colonne pour homogénéité | Uniformiser le nom de colonne (`region` → `country`) pour le merge | `noc = noc.rename(columns={"region":"country"})` | `DataFrame.rename` |
+| Merge NOC → pays | Ajouter colonne `country` à `df` depuis `noc_regions` | `df = df.merge(noc[["NOC","country"]], on="NOC", how="left")` | `DataFrame.merge` |
+| Remplacer pays manquant | Eviter `NaN` dans `country` en attribuant `Unknown` | `df["country"] = df["country"].fillna("Unknown")` | `Series.fillna` |
+| Remplacer `Medal` manquant | Indiquer explicitement qu'il n'y a pas de médaille (`None`) | `df["Medal"] = df["Medal"].fillna("None")` | `Series.fillna` |
+| Remplacer NA numériques par médiane | Remplacer `NaN` dans `Age`, `Height`, `Weight` par la médiane de la colonne | ```python\nfor col in ["Age","Height","Weight"]:\n    df[col] = df[col].fillna(df[col].median())\n``` | `Series.median`, `Series.fillna` |
+| Vérifier doublons (compte) | Connaître le nombre de lignes dupliquées avant nettoyage | `df.duplicated().sum()` | `DataFrame.duplicated` |
+| Suppression des doublons | Éliminer les enregistrements exacts en double | `df = df.drop_duplicates()` | `DataFrame.drop_duplicates` |
+| Vérification des valeurs manquantes | Contrôle final des `NaN` par colonne | `print(df.isna().sum())` | `DataFrame.isna`, `Series.sum` |
+
+
+|valeurs avant le nettoyage| valeurs apres nettoyage|
+|--------------------------|-------------------------|
+|ID         |              0|          
+|Name       |            0|
+|Sex        |             0|
+|Age        |           9474|
+|Height     |         60171|
+|Weight     |           62875|
+|Team       |              0|
+|NOC                     0|
+|Games                    0|
+|Year                     0|
+|Season                   0|
+|City                     0|
+|Sport                    0|
+|Event                    0|
+|Medal               231333|
+|dtype:               int64|                         |
+
+
 
 
 
