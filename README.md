@@ -77,12 +77,35 @@ Quelques indicateurs utilisés :
 -------
 # Importation et nettoyage de données
 
-| nom de fichier | bibliothéque utilisée | description |
-|----------------|-----------------------|-------------|
+   ### Importation des données avec python 
+
+| nom de fichier | type | bibliothéque utilisée | description |
+|----------------|------|-----------------------|-------------|
+| athlete_event | csv | pandas, numpy | athlètes, médailles, disciplines, années, etc|
+| noc_regions | csv | pandas numpy | correspondance codes NOC / pays ou régions |
+| World Development Indicators (WDI) | API | Request, time| PIB, population, taux d’alphabétisation, accès à l’électricité, etc. |
+
+# Nettoyage des données 
+   ### Informations sur les table de données 
+  ### Fonction utuliser
+  ## table athléte:
+_ `info()`:   ----------------------------------------------------------------------------_ `describe()`:                                                                      |  
+<img width="332" height="464" alt="image" src="https://github.com/user-attachments/assets/cb8b12bc-eca2-4d9b-85b2-9e75ad7c6bb1" />  |          <img width="542" height="378" alt="image" src="https://github.com/user-attachments/assets/358dfc1f-218d-4760-a6f7-e098fc6be907" />
+
+  ## Table Region:
+  _ `info()`:, _`describe()`:
+
+<img width="374" height="350" alt="image" src="https://github.com/user-attachments/assets/c0a31571-ae3a-4ec7-abc7-e908594635a5" />
 
 
 
 
+
+
+
+
+
+   
 
 
 
