@@ -120,24 +120,172 @@ _`info()`:
 | Vérification des valeurs manquantes | Contrôle final des `NaN` par colonne | `print(df.isna().sum())` | `DataFrame.isna`, `Series.sum` |
 
 
-|valeurs avant le nettoyage| valeurs apres nettoyage|
-|--------------------------|-------------------------|
-|ID         |              0|          
-|Name       |            0|
-|Sex        |             0|
-|Age        |           9474|
-|Height     |         60171|
-|Weight     |           62875|
-|Team       |              0|
-|NOC                     0|
-|Games                    0|
-|Year                     0|
-|Season                   0|
-|City                     0|
-|Sport                    0|
-|Event                    0|
-|Medal               231333|
-|dtype:               int64|                         |
+     # Comparaison des valeurs manquantes — Table athlete
+
+| Colonne   | Valeurs manquantes AVANT | Valeurs manquantes APRÈS |
+|-----------|--------------------------|---------------------------|
+| ID        | 0                        | 0                         |
+| Name      | 0                        | 0                         |
+| Sex       | 0                        | 0                         |
+| Age       | 9474                     | 0                         |
+| Height    | 60171                    | 0                         |
+| Weight    | 62875                    | 0                         |
+| Team      | 0                        | 0                         |
+| NOC       | 0                        | 0                         |
+| Games     | 0                        | 0                         |
+| Year      | 0                        | 0                         |
+| Season    | 0                        | 0                         |
+| City      | 0                        | 0                         |
+| Sport     | 0                        | 0                         |
+| Event     | 0                        | 0                         |
+| Medal     | 231333                   | 0                         |
+| country   | —                        | 0                         |
+
+          
+- Les colonnes Age, Height et Weight contenaient un volume important de valeurs manquantes.
+- Ces valeurs ont été remplacées par la médiane de chaque colonne.
+- La colonne Medal contenait plus de 231 000 valeurs manquantes, remplacées par la valeur "None".
+- Aucune valeur manquante n’existe après le nettoyage.
+- La colonne country a été ajoutée via une jointure avec la table NOC.
+
+
+
+
+# Nettoyage et Extraction des Données via l’API World Bank (WDI)
+
+| Étape | Élément | Méthode / Fonction | Description |
+|------|---------|---------------------|-------------|
+| 1 | Sélection des indicateurs | `indicators = {...}` | Liste validée des indicateurs démographiques, économiques et urbains à extraire depuis l’API WDI. |
+| 2 | Appel API | `requests.get(url)` | Envoi de la requête HTTP vers l’API World Bank pour récupérer les données. |
+| 3 | Gestion de la pagination | `while True` + `page` | Récupération automatique de toutes les pages de résultats de l’API. |
+| 4 | Conversion JSON | `response.json()` | Transformation de la réponse de l’API en format exploitable (JSON). |
+| 5 | Filtrage des valeurs manquantes | `if d["value"] is not None` | Suppression des valeurs nulles avant l’enregistrement dans le DataFrame. |
+| 6 | Sélection des colonnes | Dictionnaire Python | Conservation uniquement des champs : `country_code`, `country`, `year`, et l’indicateur concerné. |
+| 7 | Conversion du format de l’année | `int(d["date"])` | Transformation de l’année en format numérique. |
+| 8 | Stockage temporaire | `records.append({...})` | Enregistrement ligne par ligne des données récupérées. |
+| 9 | Construction du DataFrame | `pd.DataFrame(records)` | Transformation finale des données API en DataFrame Pandas. |
+| 10 | Limitation requêtes API | `time.sleep(0.05)` | Pause entre les requêtes pour éviter le blocage par l’API. |
+
+---
+
+# Comparaison des valeurs manquantes — Table WDI
+
+| Colonne                     | Valeurs manquantes AVANT | Valeurs manquantes APRÈS |
+|----------------------------|--------------------------|---------------------------|
+| country_code               | 0                        | 0                         |
+| country                    | 0                        | 0                         |
+| year                       | 0                        | 0                         |
+| population_total           | 30                       | 0                         |
+| population_active          | 30                       | 0                         |
+| population_elderly         | 30                       | 0                         |
+| female_active_population   | 8760                     | 0                         |
+| female_population_pct      | 0                        | 0                         |
+| gdp_total                  | 2587                     | 0                         |
+| gdp_per_capita             | 2587                     | 0                         |
+| gdp_growth                 | 3014                     | 0                         |
+| urban_population_pct       | 114                      | 0                         |
+| urban_density              | 6384                     | 0                         |
+| population_density         | 1607                     | 0                         |
+
+
+- Plusieurs indicateurs macro-économiques et démographiques présentaient des valeurs manquantes importantes.
+- Les colonnes les plus impactées étaient :
+  - female_active_population
+  - urban_density
+  - gdp_growth
+  - population_density
+- Après le nettoyage, toutes les valeurs manquantes ont été traitées.
+- Le dataset final est entièrement exploitable pour l’analyse et la visualisation.
+
+
+
+
+## Téléchargement Automatique de Tous les Indicateurs WDI
+
+Ce bloc de code permet de télécharger **automatiquement l’ensemble des indicateurs socio-économiques** définis dans le dictionnaire `indicators` en utilisant l’API de la **Banque Mondiale (World Bank API)**.
+
+### Fonctionnement du Processus
+
+| Étape | Action | Description |
+|-------|--------|-------------|
+| 1 | Initialisation | Création d’une liste vide `frames` destinée à stocker temporairement les DataFrames de chaque indicateur. |
+| 2 | Boucle de parcours | La boucle `for name, code in indicators.items()` parcourt tous les indicateurs un par un. |
+| 3 | Affichage du suivi | La fonction `print()` permet d’afficher en temps réel l’indicateur en cours de téléchargement. |
+| 4 | Appel API | La fonction `get_wdi_indicator(code, name)` interroge l’API World Bank pour extraire les données. |
+| 5 | Vérification des données | La condition `if not df_temp.empty` vérifie si les données récupérées ne sont pas vides. |
+| 6 | Stockage temporaire | Si les données existent, elles sont ajoutées à la liste `frames` via `frames.append(df_temp)`. |
+| 7 | Gestion des erreurs | Si aucune donnée n’est trouvée, un message d’alerte est affiché (`Vide → indicateur`). |
+| 8 | Validation du téléchargement | Le nombre total de lignes récupérées est affiché pour chaque indicateur.
+
+---
+
+### Objectif de cette Étape
+
+✔ Automatise la collecte de toutes les données WDI  
+✔ Évite le téléchargement manuel indicateur par indicateur  
+✔ Assure le contrôle qualité des données extraites  
+✔ Prépare les données pour la phase de **fusion multi-indicateurs**
+
+
+
+## Fusion Progressive des Indicateurs Socio-Économiques (WDI)
+
+Ce bloc de code permet de **fusionner progressivement tous les DataFrames des indicateurs WDI** téléchargés précédemment en un seul DataFrame global appelé `df_wdi`.
+
+### Principe de Fonctionnement
+
+| Étape | Action | Description |
+|-------|--------|-------------|
+| 1 | Initialisation | Le premier DataFrame des indicateurs est utilisé comme base avec `df_wdi = frames[0]`. |
+| 2 | Parcours des indicateurs | La boucle `for f in frames[1:]:` parcourt tous les autres DataFrames restants. |
+| 3 | Fusion progressive | La fonction `merge()` permet d’ajouter chaque indicateur au DataFrame principal. |
+| 4 | Clés de jointure | La fusion est réalisée sur les colonnes communes : `country`, `country_code` et `year`. |
+| 5 | Type de jointure | Le paramètre `how="outer"` garantit que **toutes les données sont conservées**, même si certaines valeurs manquent. |
+| 6 | Construction finale | Le DataFrame `df_wdi` devient un tableau complet contenant l’ensemble des indicateurs économiques, démographiques et urbains. |
+
+---
+
+### Objectif de cette Étape
+
+✔ Centraliser tous les indicateurs dans une seule table  
+✔ Conserver l’historique complet des pays et des années  
+✔ Préparer les données pour le nettoyage avancé  
+✔ Faciliter l’analyse croisée avec les données sportives (JO)
+
+
+
+## Tableau des Modifications – Calcul des KPI Actionnables
+
+| Nom du KPI | Nouvelle Colonne Créée | Colonnes Utilisées | Formule Appliquée | Objectif |
+|------------|--------------------------|---------------------|-------------------|----------|
+| Performance pondérée par million | `kpi_weighted_per_million` | `medal_weighted`, `population_total` | `medal_weighted / (population_total / 1e6)` | Comparer la performance indépendamment de la taille de la population |
+| Médailles par PIB total | `kpi_medals_per_gdp` | `total_medals`, `gdp_total` | `total_medals / gdp_total` | Mesurer l’efficacité économique |
+| Médailles par PIB/habitant | `kpi_medals_per_gdp_capita` | `total_medals`, `gdp_per_capita` | `total_medals / gdp_per_capita` | Performance relative au niveau de vie |
+| Médailles par population active | `kpi_medals_per_active_pop` | `total_medals`, `population_active` | `total_medals / population_active` | Efficacité de la population active |
+| Score d’efficacité active | `kpi_active_efficiency_score` | `medal_weighted`, `population_active` | `medal_weighted / population_active` | Performance sportive de la force de travail |
+| Taux de participation | `kpi_participation_rate` | `athletes`, `population_active` | `athletes / population_active` | Mesure l’implication sportive du pays |
+| Participation féminine estimée | `kpi_female_participation_active` | `female_population_pct`, `athletes` | `(female_population_pct × athletes) / 100` | Estimation de la participation des femmes |
+| Efficacité composite globale | `kpi_efficiency_composite` | `medal_weighted`, `population_total`, `gdp_per_capita` | `medal_weighted / (population_total × gdp_per_capita)` | Performance globale population + économie |
+| Performance par milliard $ PIB | `kpi_weighted_per_gdp` | `medal_weighted`, `gdp_total` | `medal_weighted / (gdp_total / 1e9)` | Normalisation économique forte |
+| Médailles par croissance du PIB | `kpi_medals_per_gdp_growth` | `total_medals`, `gdp_growth` | `total_medals / gdp_growth` | Impact de la croissance économique |
+| Médailles & urbanisation | `kpi_medals_urbanization` | `total_medals`, `urban_population_pct` | `total_medals / urban_population_pct` | Effet de l’urbanisation |
+| Médailles par densité population | `kpi_medals_density` | `total_medals`, `population_density` | `total_medals / population_density` | Performance par densité humaine |
+| Médailles par densité urbaine | `kpi_medals_urban_density` | `total_medals`, `urban_density` | `total_medals / urban_density` | Impact de la concentration urbaine |
+
+
+
+### Nettoyage Final des KPI
+
+Cette étape supprime toutes les lignes contenant au moins une valeur manquante (`NaN`) dans le DataFrame `df_kpi`.
+
+L’objectif est de garantir que l’ensemble des indicateurs calculés est **complet, cohérent et directement exploitable** pour les analyses statistiques, les visualisations et les tableaux de bord.
+
+```python
+df_kpi = df_kpi.dropna()
+
+
+
+
 
 
 
