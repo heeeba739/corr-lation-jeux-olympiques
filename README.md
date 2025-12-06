@@ -319,6 +319,38 @@ L’objectif est de garantir que l’ensemble des indicateurs calculés est **co
 
 
 
+# Modelisation avec tableau
+<img width="1025" height="494" alt="image" src="https://github.com/user-attachments/assets/f20084f5-ab00-4065-bf4b-83fb2c377faa" />
+
+
+<img width="863" height="483" alt="image" src="https://github.com/user-attachments/assets/df0d4fb7-1ade-45b8-9a9c-40e39f298947" />
+
+<img width="1011" height="541" alt="image" src="https://github.com/user-attachments/assets/16803ebc-e4e5-4d2c-a314-3afbb7148cc1" />
+
+<img width="1045" height="507" alt="image" src="https://github.com/user-attachments/assets/b22c5de6-8126-4ed6-b92f-a8482e636839" />
+
+
+<img width="1037" height="491" alt="image" src="https://github.com/user-attachments/assets/dc6a961e-fe08-4ea5-8150-c7ab2517cc18" />
+
+<img width="1035" height="515" alt="image" src="https://github.com/user-attachments/assets/634b9bd0-2739-48a4-8c4a-4e560d2378b7" />
+
+<img width="1154" height="575" alt="image" src="https://github.com/user-attachments/assets/2b5a71c8-0661-4954-8f12-e1d980bc1c83" />
+
+<img width="1124" height="549" alt="image" src="https://github.com/user-attachments/assets/b1e366c5-a139-4ee1-ab58-f563bead6a4c" />
+
+<img width="1049" height="547" alt="image" src="https://github.com/user-attachments/assets/d03a24b0-b95a-4342-848f-3d41a9805cae" />
+
+<img width="787" height="474" alt="image" src="https://github.com/user-attachments/assets/b53fb3e1-46c7-4daf-8304-1a4948446fb4" />
+
+
+
+
+
+
+
+
+
+
 
 
 
