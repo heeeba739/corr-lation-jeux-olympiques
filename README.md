@@ -120,7 +120,7 @@ _`info()`:
 | Vérification des valeurs manquantes | Contrôle final des `NaN` par colonne | `print(df.isna().sum())` | `DataFrame.isna`, `Series.sum` |
 
 
-     # Comparaison des valeurs manquantes — Table athlete
+ # Comparaison des valeurs manquantes — Table athlete
 
 | Colonne   | Valeurs manquantes AVANT | Valeurs manquantes APRÈS |
 |-----------|--------------------------|---------------------------|
@@ -141,7 +141,7 @@ _`info()`:
 | Medal     | 231333                   | 0                         |
 | country   | —                        | 0                         |
 
-          
+   ## Conclusion       
 - Les colonnes Age, Height et Weight contenaient un volume important de valeurs manquantes.
 - Ces valeurs ont été remplacées par la médiane de chaque colonne.
 - La colonne Medal contenait plus de 231 000 valeurs manquantes, remplacées par la valeur "None".
@@ -187,7 +187,7 @@ _`info()`:
 | urban_density              | 6384                     | 0                         |
 | population_density         | 1607                     | 0                         |
 
-
+## Conclusion
 - Plusieurs indicateurs macro-économiques et démographiques présentaient des valeurs manquantes importantes.
 - Les colonnes les plus impactées étaient :
   - female_active_population
@@ -278,10 +278,44 @@ Ce bloc de code permet de **fusionner progressivement tous les DataFrames des in
 
 Cette étape supprime toutes les lignes contenant au moins une valeur manquante (`NaN`) dans le DataFrame `df_kpi`.
 
-L’objectif est de garantir que l’ensemble des indicateurs calculés est **complet, cohérent et directement exploitable** pour les analyses statistiques, les visualisations et les tableaux de bord.
+L’objectif est de garantir que l’ensemble des indicateurs calculés est **complet, cohérent et directement exploitable** pour les analyses statistiques, les visualisations et les tableaux de bord.(python:  df_kpi = df_kpi.dropna()) 
+    
+| Ligne de code | Action | Objectif |
+|---------------|--------|----------|
+| `df_kpi = df_kpi.merge(noc[["NOC", "country"]], on="country", how="left")` | Fusion des dataframes | Ajouter la colonne `NOC` à `df_kpi` à partir de `noc` selon la colonne `country` |
+| `df["NOC"] = df["NOC"].replace("SGP","SIN")` | Remplacement de valeur | Normaliser le code pays `"SGP"` en `"SIN"` dans le dataframe `df` |
+| `df_kpi.to_csv("df_kpi.csv", index=False)` | Export CSV | Sauvegarder le dataframe `df_kpi` dans un fichier CSV |
+| `noc.to_csv("df_noc.csv", index=False)` | Export CSV | Sauvegarder le dataframe `noc` dans un fichier CSV |
+| `df.to_csv("df_ath.csv", index=False)` | Export CSV | Sauvegarder le dataframe `df` dans un fichier CSV |
+| `df_final = df_final.drop("NOC_y", axis=1)` | Suppression de colonne | Supprimer la colonne `NOC_y` pour éviter les doublons après fusion |
 
-```python
-df_kpi = df_kpi.dropna()
+
+# Connextion avec SQL
+
+| Ligne de code | Action | Objectif |
+|---------------|--------|----------|
+| `from sqlalchemy import create_engine` | Import de la fonction `create_engine` | Permet de créer un moteur de connexion à une base SQL depuis Python |
+| `engine = create_engine("mysql+pymysql://root:Hiba41hh07%40@localhost:3306/olympiade", echo=False)` | Création du moteur de connexion | Se connecter à la base MySQL `olympiade` avec l’utilisateur `root` et le mot de passe fourni |
+| `noc.to_sql("dim_region", engine, if_exists="replace", index=False)` | Insertion DataFrame `noc` | Créer ou remplacer la table `dim_region` dans MySQL avec les données de `noc` |
+| `df.to_sql("dim_athlete", engine, if_exists="replace", index=False)` | Insertion DataFrame `df` | Créer ou remplacer la table `dim_athlete` dans MySQL avec les données de `df` |
+| `df_final.to_sql("dim_kpi", engine, if_exists="replace", index=False)` | Insertion DataFrame `df_final` | Créer ou remplacer la table `dim_kpi` dans MySQL avec les données de `df_final` |
+
+# Creation de database
+| Ligne de code | Action | Objectif |
+|---------------|--------|----------|
+| `DROP DATABASE IF EXISTS olympiade;` | Suppression de la base si elle existe | Nettoyer l’environnement avant de créer une nouvelle base |
+| `CREATE DATABASE olympiade;` | Création de la base de données | Créer une nouvelle base MySQL nommée `olympiade` |
+| `USE olympiade;` | Sélection de la base | Définir la base `olympiade` comme base active pour les commandes suivantes |
+| `ALTER TABLE olympiade.dim_kpi ADD COLUMN PK INT NOT NULL AUTO_INCREMENT PRIMARY KEY;` | Ajout d’une colonne `PK` | Créer une clé primaire auto-incrémentée pour `dim_kpi` |
+| `ALTER TABLE olympiade.dim_athlete ADD COLUMN PK INT NOT NULL AUTO_INCREMENT PRIMARY KEY;` | Ajout d’une colonne `PK` | Créer une clé primaire auto-incrémentée pour `dim_athlete` |
+| `ALTER TABLE dim_region ADD PRIMARY KEY (NOC);` | Définition clé primaire | Définir `NOC` comme clé primaire de `dim_region` |
+| `ALTER TABLE dim_kpi ADD FOREIGN KEY (NOC_x) REFERENCES dim_region(NOC);` | Ajout clé étrangère | Relier `dim_kpi` à `dim_region` via `NOC_x` |
+| `ALTER TABLE dim_athlete ADD FOREIGN KEY (NOC) REFERENCES dim_region(NOC);` | Ajout clé étrangère | Relier `dim_athlete` à `dim_region` via `NOC` |
+
+# shema relationelle
+<img width="621" height="556" alt="image" src="https://github.com/user-attachments/assets/0b52d65b-8fe9-40a2-afb5-1a7c74212fe4" />
+
+
 
 
 
